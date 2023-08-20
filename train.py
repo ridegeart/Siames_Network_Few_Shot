@@ -38,7 +38,7 @@ print(x_train_List.shape)
 print('test shape：')
 print(x_test_List.shape)
 
-siamese = SiameseNetwork(seed=0, width=105, height=105, cells=3, loss=AdaptiveContrastiveLoss(), metrics=['accuracy'],
+siamese = SiameseNetwork(seed=0, width=105, height=105, cells=3, loss=contrastive_loss, metrics=['accuracy'],
               optimizer= Adam(0.00006), dropout_rate=0.4)
 #siamese_net = load_model('/content/drive/MyDrive/lfwa/lfw2/best_c_76.0.h5', custom_objects={"W_init": W_init ,"b_init": b_init})
 #siamese.siamese_net.load_weights("./weight/best_c_2.h5")
@@ -117,6 +117,7 @@ for i in range(1,300):
   train_loss_df = pd.DataFrame({"Epochs":epochs, "Loss":train_epoch_loss, "Mode":['train']*(num_epoch[0])})
 
   test_accuracy_df = pd.DataFrame({"Epochs":epochs, "Accuracy":test_epoch_acc, "Mode":['test']*(num_epoch[0])})
+  test_loss_df = pd.DataFrame({"Epochs":epochs, "Loss":test_epoch_loss, "Mode":['test']*(num_epoch[0])})
 
   sns.lineplot(data=train_accuracy_df.reset_index(), x='Epochs', y='Accuracy', hue='Mode')
   plt.title('Accuracy Graph')
