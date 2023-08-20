@@ -2,6 +2,8 @@ import keras
 from sklearn.preprocessing import  OneHotEncoder
 import tensorflow as tf
 from keras import backend as K
+import tensorflow as tf
+from tensorflow.keras.losses import Loss
 
 def l_softmax_loss(y_true, y_pred, m=4, depth=10):
     depth = len(y_true)
@@ -58,3 +60,22 @@ def mixed_loss(y_true, y_pred, alpha=0.25, gamma=2.0, margin=1.0, num_classes=20
     total_loss = c_loss
 
     return total_loss
+
+class AdaptiveContrastiveLoss(Loss):
+    def __init__(self, initial_margin=1.0, margin_update_rate=0.01):
+        super(AdaptiveContrastiveLoss, self).__init__()
+        self.margin = initial_margin
+        self.margin_update_rate = margin_update_rate
+
+    def update_margin(self, margin_difficulty):
+        self.margin += self.margin_update_rate * margin_difficulty
+
+    def call(self, y_true, distances):
+        # Calculate contrastive loss
+        loss = y_true * tf.square(distances) + (1 - y_true) * tf.square(tf.maximum(self.margin - distances, 0.0))
+        
+        # Estimate difficulty based on the margin difference
+        margin_difficulty = tf.square(self.margin - distances) * (1 - y_true)
+        self.update_margin(margin_difficulty)
+
+        return tf.reduce_mean(loss)
